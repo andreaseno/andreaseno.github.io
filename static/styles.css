@@ -11,3 +11,8 @@ header .social li {
 }
 header .social li a { color: #fff; }
 header .social li a:hover { color: #11ABB0; }
+
+img .homelogo {
+    width: 20%;
+    height: auto;
+}
