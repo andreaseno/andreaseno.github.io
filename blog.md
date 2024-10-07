@@ -2,7 +2,8 @@
 title: Building a Financial Chatbot with Retrieval-Augmented Generation (RAG)
 author: Owen Andreasen
 date: 10/04/2024
-layout: post
+layout: page
+permalink: /LLM_RAG/
 ---
 
 # Introduction
