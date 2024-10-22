@@ -66,9 +66,39 @@ For example, Apple’s Q3 earnings for 2023 has the path `pdf_files/Apple/2023/1
 
 Because of the second point above, I was able to structure my script to first create a set of identical directories under a folder called md_files and not parse a document if the associated markdown file already exists in md_files. This is important because I only have a certain number of free files to parse a day using the LlamaParse API, and then I have to wait until the next day to parse the next file.
 
-### Vector Database
+### Database
 
 For my vector database, I was originally choosing between using sqlite and postgreSQL. I started with trying to use sqlite but quickly ran into a lot of issues with getting vss (the vector extension) set up so I opted for PostgreSql instead. PostgreSQL with pgvector was very easy to set up using a docker image, and it was also very easy to integrate with python.
+
+My database has a vector table called embedding_chunks which contains the embeddings for each chunk and the associated year, company, quarter, and document type associated with that chunk. Here is the `\d embedding_chunks` output, which describes the schema of the table: 
+```
+                                        Table "public.embedding_chunks"
+     Column     |          Type          | Collation | Nullable |                   Default                    
+----------------+------------------------+-----------+----------+----------------------------------------------
+ id             | bigint                 |           | not null | nextval('embedding_chunks_id_seq'::regclass)
+ embedding      | vector(768)            |           |          | 
+ company        | text                   |           |          | 
+ year           | character varying(4)   |           |          | 
+ document_type  | character varying(255) |           |          | 
+ fiscal_quarter | character varying(2)   |           |          | 
+Indexes:
+    "embedding_chunks_pkey" PRIMARY KEY, btree (id)
+```
+My database also contains a relational table called text_chunks which contains the raw text for each chunk and the associated year, company, quarter, and document type associated with that chunk. The id column in the text_chunks table is a primary key, and forms a foreign key with the embedding_chunks table. This means that whenever I need the raw text for a certain embedding, I can just consult this relational table. Here is the `\d text_chunks` output, which describes the schema of the table: 
+```
+                        Table "public.text_chunks"
+     Column     |          Type          | Collation | Nullable | Default 
+----------------+------------------------+-----------+----------+---------
+ id             | bigint                 |           | not null | 
+ text           | text                   |           |          | 
+ company        | text                   |           |          | 
+ year           | character varying(4)   |           |          | 
+ document_type  | character varying(255) |           |          | 
+ fiscal_quarter | character varying(2)   |           |          | 
+Indexes:
+    "text_chunks_pkey" PRIMARY KEY, btree (id)
+```
+As previously mentioned, the files are stored in a nexted directory structure suc that the path of each document gives metadata about the fiscal year, company, document type, and fiscal quarter of each document. This is how we get this information when we are populating the database. 
 
 ### Embedding
 
@@ -97,6 +127,42 @@ To make the chunking more effective I implemented a chunking algorithm with the 
 
 **FILL OUT**
 
+### RAG Pipeline
+
+The RAG pipeline from a very high level consists of the following steps (I would like to note that this is a very high level description, and there are a lot more nuances that go into setting up a RAG pipeline):
+
+1) Grab user input
+
+2) Create embedding from user query
+
+3) Perform Vector Similarity Search on DB (as described in the previous section)
+
+4) Take the Chunks returned from step 3 and insert it as context into the original query 
+
+5) Take the context-enhanced query and pass it to the LLM as part as the user's conversation
+
+![Alt text](img/RAG_Pipeline.png)
+
+One early issue that I encountered with retrieval was making sure that the right document is being returned, rather than similar content from an unintended document. For example, say I am asking about Apple's debt in 2023. Language describing debt is common in any 10Q/10K file, and so it is likely to return that content from a 10Q/10K file from a different year, or even a different company. To combat this I first filter down my results to perform vector search on by year and company. This is done in two steps:
+
+The first step is to query the same LLM (llama3.1:7b) used for user conversation, and ask it to extract the years and companies related to the query into a list format. Below is an example of what this might look like:
+
+**User Query:**
+```
+User: How much debt did tesla have in 2024?
+```
+**LLM Response:**
+```
+Based on your prompt, here are the companies and years extracted from the user's query:
+
+**Companies** = ['Tesla']
+**Years** = [2024]
+```
+The LLM will always give the two lists in the same format, so I can easily parse and extract the two lists using a simple regex expression. After this parsing step, I will have two variables, one containing the list of related companies, the other the list of related years. 
+
+Step 2 is to take these two lists and use them to filter down the total embeddings table to only the embeddings that fit this information. To do this, we simply include a WHERE clause in the PostgreSQL query that will only return the filtered results, and then perform our desired vector similarity algorithm to those results.
+
+
 ### Evalutation
 
 **FILL OUT**
@@ -113,7 +179,7 @@ To make the chunking more effective I implemented a chunking algorithm with the 
 
 ---
 
-# 7. Results & Performance
+# Results & Performance
 
 **FILL OUT**
 
