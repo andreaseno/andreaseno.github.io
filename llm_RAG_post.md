@@ -217,7 +217,7 @@ $$Recall@k = {True Positives@k \over (True Positives@k)+(False Negatives@k)}.$$
 ![Recall@k](img/recallk.png)
 
 F1@k combines precision and recall into a single metric, so it was a no brainer to also implement this as well. It is beneficial in scenarios where you must balance retrieving all relevant items (recall) and ensuring they are applicable (precision), and is helpful in situations where missing relevant documents or retrieving too many irrelevant items is costly. This is perfect for my scenario, so I will be heavily relying on F1@k. It is calculated as follows:
-$$Recall@k = {2 * (Precision@k) * (Recall@k) \over (Precision@k) + (Recall@k)}.$$
+$$F1@k = {2 * (Precision@k) * (Recall@k) \over (Precision@k) + (Recall@k)}.$$
 
 #### Generation Evalution Metrics
 
