@@ -13,8 +13,8 @@ In this blog, I will walk through my process of building a financial chatbot tha
 ## Project Overview
 - **Goal:** To create a chatbot that provides contextually relevant answers by retrieving financial information from 10-Q filings. This chatbot will be largely on premises meaning I will limit the usage of API's and external libraries where I can.
 - **Technology Stack:**
-  - Ollama 3.1:7b and 3.2:1b
-  - PostgreSQL with pgvector for vector similarity search
+  - Ollama 3.1:7b and 3.2:1b [^2]
+  - PostgreSQL with pgvector for vector similarity search [^3]
   - Python for backend processing
   - Docker for containerization of the database
 
@@ -23,9 +23,9 @@ In this blog, I will walk through my process of building a financial chatbot tha
 RAG allows us to combine the strengths of information retrieval with the generative capabilities of LLMs. Here, I will discuss why RAG is a good fit for financial document search and analysis.
 
 - **Why RAG?**
-  - Traditional LLMs may hallucinate facts.
+  - Traditional LLMs may hallucinate facts. 
   - LLM's have a knowledge cutoff date, meaning they do not have knowledge about recent filings
-  - RAG ensures that answers are grounded in real data.
+  - RAG ensures that answers are grounded in real data. [^1]
 - **Use Case: SEC 10-Q Filings**
   - The chatbot retrieves data from a curated database of 10-Q filings.
 
@@ -39,7 +39,7 @@ I started this project by setting up the CLI interface. First step was do downlo
 
 ## Prompt Engineering
 
-Prompt engineering is when you restructure a query for a language model (like GPT) to help guide it to the desired output. A well-designed prompt will help the model understand the task, context, and desired response more effectively. As a start for my model, I designed a system prompt for it. A system prompt is a special prompt passed to the model at the beginning of a chat to help shape the "personality" of the model. Typically they are used to instruct the model how to behave, what to expect from a query, and reinforce certain rules in the chat (Ex: telling the model to avoid reproducing copyrighted material). For my system prompt, I informed the model that it is a financial chatbot and that it's task is to answer financial questions. I also gave it an example of what a sample query might look like so that it is better at reading the engineered queries that will be passed to it. Here is a screenshot of the system prompt :
+Prompt engineering is when you restructure a query for a language model (like GPT) to help guide it to the desired output. A well-designed prompt will help the model understand the task, context, and desired response more effectively [^4]. As a start for my model, I designed a system prompt for it. A system prompt is a special prompt passed to the model at the beginning of a chat to help shape the "personality" of the model. Typically they are used to instruct the model how to behave, what to expect from a query, and reinforce certain rules in the chat (Ex: telling the model to avoid reproducing copyrighted material). For my system prompt, I informed the model that it is a financial chatbot and that it's task is to answer financial questions. I also gave it an example of what a sample query might look like so that it is better at reading the engineered queries that will be passed to it. Here is a screenshot of the system prompt :
 
 ![System Prompt](img/system_prompt.png)
 
@@ -225,10 +225,7 @@ For a RAG pipeline you typically want to assess both the retrieval results and t
 
 I decided that I wanted to do something more novel to automate the generation process. Instead of develop a dataset of sample queries and the desired outputs, I decided to automatically generate very simple queries with yes/no answers about the performance of each company I wanted to assess. Then, I can calculate what the answer should be based on stock analysis of the company. For example, say Ford went down by 15% in the year 2023. I could algorithmically grab that information from API's and then make sure the LLM says "no" to the question "Did Ford perform well in 2023?" This way I do not have to spend hours manually generating these generation queries and desired outputs.  
 
-
-
-
-**FILL OUT**
+To achieve this I leveraged Y-Finance's Python API to retrieve stock information. I decided that it would be easiest to start by assessing performance on a yearly basis. This decision was made mostly because  
 
 ### Improvements and Optimization
 
@@ -256,4 +253,18 @@ I decided that I wanted to do something more novel to automate the generation pr
 
 # References
 
-**FILL OUT**
+[^1] Yunfan Gao, Yun Xiong, Xinyu Gao, Kangxiang Jia, Jinliu Pan, Yuxi Bi, Yi Dai, Jiawei Sun, Meng Wang, and Haofen Wang, "Retrieval-Augmented Generation for Large Language Models: A Survey," *arXiv preprint*, arXiv:2312.10997, 2024. [Online](https://arxiv.org/abs/2312.10997).
+
+[^2] [Ollama official site](https://ollama.com/)
+
+[^3] [PostgeSQL pgvector Documentation](https://github.com/pgvector/pgvector)
+
+[^4] Pranab Sahoo, Ayush Kumar Singh, Sriparna Saha, Vinija Jain, Samrat Mondal, and Aman Chadha, "A Systematic Survey of Prompt Engineering in Large Language Models: Techniques and Applications," *arXiv preprint*, arXiv:2402.07927, 2024. [Online](https://arxiv.org/abs/2402.07927).
+
+
+
+
+
+
+
+
