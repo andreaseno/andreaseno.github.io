@@ -31,12 +31,12 @@ github_username:  andreaseno
 theme: minima
 plugins:
   - jekyll-feed
-  - jekyll-include-cache
+#   - jekyll-include-cache
 
-minima:
-  include:
-    scripts:
-      - /assets/js/mathjax.js
+# minima:
+#   include:
+#     scripts:
+#       - /assets/js/mathjax.js
 
 
 # Exclude from processing.

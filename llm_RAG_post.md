@@ -38,13 +38,52 @@ I started this project by setting up the CLI interface. First step was do downlo
 
 ## Prompt Engineering
 
-Prompt engineering is when you restructure a query for a language model (like GPT) to help guide it to the desired output. A well-designed prompt will help the model understand the task, context, and desired response more effectively.<sup>4</sup> As a start for my model, I designed a system prompt for it. A system prompt is a special prompt passed to the model at the beginning of a chat to help shape the "personality" of the model. Typically they are used to instruct the model how to behave, what to expect from a query, and reinforce certain rules in the chat (Ex: telling the model to avoid reproducing copyrighted material). For my system prompt, I informed the model that it is a financial chatbot and that it's task is to answer financial questions. I also gave it an example of what a sample query might look like so that it is better at reading the engineered queries that will be passed to it. Here is a screenshot of the system prompt :
+Prompt engineering is when you restructure a query for a language model (like GPT) to help guide it to the desired output. A well-designed prompt will help the model understand the task, context, and desired response more effectively.<sup>4</sup> As a start for my model, I designed a system prompt for it. A system prompt is a special prompt passed to the model at the beginning of a chat to help shape the "personality" of the model. Typically they are used to instruct the model how to behave, what to expect from a query, and reinforce certain rules in the chat (Ex: telling the model to avoid reproducing copyrighted material). For my system prompt, I informed the model that it is a financial chatbot and that it's task is to answer financial questions. I also gave it an example of what a sample query might look like so that it is better at reading the engineered queries that will be passed to it. Here is a code snippet of the system prompt :
 
-![System Prompt](img/system_prompt.png)
+```
+system_prompt = """You are an AI assistant tasked with answering financial questions. Your task is to answer simple questions about a company based on the <context> element of the query.
+    Here is an example query in the same format queries will be asked
+    
+    ```
+    **Context**: <context>
+                ...
+                <context>
+    **Query**: <query>
+                ...
+                </query>
+    ```
+    
+    When the user asks a question about a company, use information from the <context> element to answer the question asked in <query>. Assume that the <context> information is relevant to the company and time period asked about, even if not explicitly stated.
+    
+    
+    
+    
+"""
+```
 
 You'll notice that for the format of injected queries, I use HTML tags to separate out content and I use Markdown bold formatting for the content headers. This is all done to help the LLM better understand the structure of the query, help draw it's attention to the important parts, and prevent confusion for the model.<sup>5</sup> Below is a screenshot of the final result with a markdown table passed in as context. 
 
-![Sample MD](img/sample_md_table.png)
+```
+md_content = """# Apple Inc.
+## CONDENSED CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME (Unaudited)
+### (In millions)
+| Description                                                                                          | Three Months Ended |         | Nine Months Ended |         |
+|------------------------------------------------------------------------------------------------------|---------------------|---------|-------------------|---------|
+|                                                                                                      | July 1, 2023       | June 25, 2022 | July 1, 2023     | June 25, 2022 |
+| Net income                                                                                           | $ 19,881            | $ 19,442 | $ 74,039          | $ 79,082 |
+| Other comprehensive income/(loss):                                                                    |                     |         |                   |         |
+| Change in foreign currency translation, net of tax                                                  | (385)               | (721)   | (494)             | (1,102) |
+| Change in unrealized gains/losses on derivative instruments, net of tax:                           |                     |         |                   |         |
+| Change in fair value of derivative instruments                                                       | 509                 | 852     | (492)             | 1,548   |
+| Adjustment for net (gains)/losses realized and included in net income                              | 103                 | 121     | (1,854)           | (87)    |
+| Total change in unrealized gains/losses on derivative instruments                                   | 612                 | 973     | (2,346)           | 1,461   |
+| Change in unrealized gains/losses on marketable debt securities, net of tax:                      |                     |         |                   |         |
+| Change in fair value of marketable debt securities                                                  | (340)               | (3,150) | 1,963             | (9,959) |
+| Adjustment for net (gains)/losses realized and included in net income                              | 58                  | 95      | 185               | 140     |
+| Total change in unrealized gains/losses on marketable debt securities                               | (282)               | (3,055) | 2,148             | (9,819) |
+| 
+"""
+```
 
 ![CLI Interface first version](img/cli.png)
 
@@ -207,15 +246,26 @@ There are a lot of different performance metrics that one can use for RAG when e
 Binary Relevance Metrics can be broken down further into two sub-categories: 1) Order Unaware and 2) Order Aware. These two categories are fairly self explanatory, where order unaware will grade based on the total number or relevant documents returned regardless of order, whereas order aware will give better grades when relevant documents are more towards the beginning of the returned documents.
 
 To start simple, I decided that I would begin by implementing the two most basic Order Unaware Binary Relevance Metrics: Precision@k and Recall@K. These metrics are very similar to their counterparts in classical machine learning. Precision@k examines how many items in the retrieved chunk set are relevant, where K is the number of chunks considered. It is ideal for scenarios where the accuracy of each result is more important than finding every possible relevant result. K operates like a sliding window, allowing us to consider the metric's value at a given position. One limitation of Precision@k is that it does not consider the relative position of results. It is calculated as follows: 
-$$Precision@k = {True Positives@k \over (True Positives@k)+(False Positives@k)}.$$
-![Precision@k](img/precisionk.png) 
+
+\\[
+  Precision@k = {True Positives@k \over (True Positives@k)+(False Positives@k)}.
+\\]
+
+![Precision@k](img/precisionk_updated.png) 
 
 Recall@k determines how many relevant results your retrieval step returns from all existing relevant results for the query, where K is the number of results considered. This statistic is ideal for scenarios where capturing all relevant items in the result set is essential, even if this means including some irrelevant ones. It is helpful when the cost of missing a relevant document is high, or the user is willing to review more results. It is calculated as follows: 
-$$Recall@k = {True Positives@k \over (True Positives@k)+(False Negatives@k)}.$$
-![Recall@k](img/recallk.png)
+
+\\[
+  Recall@k = {True Positives@k \over (True Positives@k)+(False Negatives@k)}.
+\\]
+
+![Recall@k](img/recallk_updated.png)
 
 F1@k combines precision and recall into a single metric, so it was a no brainer to also implement this as well. It is beneficial in scenarios where you must balance retrieving all relevant items (recall) and ensuring they are applicable (precision), and is helpful in situations where missing relevant documents or retrieving too many irrelevant items is costly. This is perfect for my scenario, so I will be heavily relying on F1@k. It is calculated as follows:
-$$F1@k = {2 * (Precision@k) * (Recall@k) \over (Precision@k) + (Recall@k)}.$$
+
+\\[
+  F1@k = {2 * (Precision@k) * (Recall@k) \over (Precision@k) + (Recall@k)}.
+\\]
 
 ### Generation Evalution Metrics
 
