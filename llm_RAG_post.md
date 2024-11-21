@@ -242,7 +242,8 @@ The first step in evaluating my RAG pipeline is to test the retrieval at various
 Starting with precision, we can see that starts high and decreases as k increases. This makes sense because precision is a measure of how many of the returned chunks are relevant, and as k increases, relevant chunks are bound to be diluted by irrelevant chunks. Looking at recall next, we can see that recall increases as k increases. This also makes sense because Recall is a measure of how many of the total relevant chunks you ended up retrieving, and increasing k results in higher possibility of retrieving more relevant chunks. Lastly, f1 seems to have a somewhat concave relationship. F1 is the balance between precision and recall, so this makes sense cue to recall's slight concavity. 
 
 For our purposes, we are going to worry more about precision rather than recall. This is because most questions that could be asked can be answered with a subset of the relevant chunks (meaning recall is not as important), and we are a lot more concerned with not diluting the top k chunks because irrelevant chunks sneaking in could confuse the LLM when drawing a conclusion (meaning precision is much more important). Lastly, we still want to balance the two out so we will look at f1 as a measure of making sure we are balancing the two well. Because of this, k = 2 seems to be the right choice to use. Below is a detailed breakdown of the results for k = 2 showing statistics broken down by company and query keyword
-<!-- **Results for k = 1:**
+{% comment %}
+**Results for k = 1:**
 ```
 Average Precision@k: 0.425
 Average Recall@k: 0.18416666666666665
@@ -264,7 +265,8 @@ Keyword: earnings per share (EPS), Precision@k: 0.75, Recall@k: 0.23, F1@k: 0.35
 Keyword: total assets, Precision@k: 0.25, Recall@k: 0.25, F1@k: 0.25
 Keyword: debt, Precision@k: 0.62, Recall@k: 0.24, F1@k: 0.34
 Keyword: total cash, Precision@k: 0.38, Recall@k: 0.17, F1@k: 0.23
-``` -->
+```
+{% endcomment %}
 
 **Results for k = 2:**
 ```
@@ -315,7 +317,7 @@ From here we can see that Nvidia and Meta seem to perform a bit better than othe
 There is a bit more consistency across the keyword averages than the company averages which could lead us to believe that variations in document structure and setup from company to company causes much more issues than varying the question being asked. We also see that the highest scoring queries are related to EPS and debt, where the lowest scoring keywords are related to revenue and debt. EPS and debt information is typically more self contained in their own tables, and also is sometimes included in body paragraphs. That could explain why it is more easily retrieved than revenue and total assets, which is typically included in the larger Consolodated Balance Sheets table and is not mentioned nearly as mugh in body paragraphs.
 
 From these results, it seems as though k = 2 will be a valid k value to use in the future, although k = 3 could still be used without sacrificing too much precision and still maximizing f1 score. Next we will examine the generation evaluation.
-<!-- 
+{% comment %}
 **Results for k = 3:**
 ```
 Average Precision@k: 0.30000000000000004
@@ -386,7 +388,8 @@ Keyword: earnings per share (EPS), Precision@k: 0.33, Recall@k: 0.48, F1@k: 0.38
 Keyword: total assets, Precision@k: 0.10, Recall@k: 0.50, F1@k: 0.17
 Keyword: debt, Precision@k: 0.28, Recall@k: 0.50, F1@k: 0.35
 Keyword: total cash, Precision@k: 0.15, Recall@k: 0.33, F1@k: 0.21
-``` -->
+``` 
+{% endcomment %}
 
 ### Generation Evalution Results & Performance
 
@@ -440,7 +443,7 @@ This is what my RAG pipeline will look like after implementing these optimizatio
 
 ![Optimized RAG Pipeline](img/optimized_rag_pipeline.png) 
 
-
+{% comment %}
 ## Optimized Results & Performance
 
 **FILL OUT**
@@ -456,7 +459,10 @@ This is what my RAG pipeline will look like after implementing these optimizatio
 # Future Work
 
 **FILL OUT**
-  
+{% endcomment %}
+
+
+
 ---
 
 # References
