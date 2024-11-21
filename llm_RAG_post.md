@@ -6,7 +6,7 @@ layout: page
 permalink: /LLM_RAG/
 ---
 
-# Introduction
+## Introduction
 
 In this blog, I will walk through my process of building a financial chatbot that uses **Retrieval-Augmented Generation (RAG)**. This project leverages **Ollama** as the large language model (LLM) and retrieves financial data from a database of **SEC 10-Q filings** using a hybrid search method combining vector similarity and keyword search.
 
@@ -31,8 +31,6 @@ RAG allows us to combine the strengths of information retrieval with the generat
   - The chatbot retrieves data from a curated database of 10-Q filings.
 
 ---
-
-# My Process
 
 ## CLI Interface
 
@@ -196,13 +194,13 @@ The RAG pipeline from a very high level consists of the following steps (I would
 
 Evaluating a RAG pipeline is a hard and tedious task, that has many possible routes to take, but no one best technique or strategy. Much of it is trial and error, and so this can take a lot of time and energy. I wanted to start my evaluation pipeline by using some form of context relevance algorithm to give measurable metrics on the performance of my RAG. The reason I went this route is because context relevance algorithms typically are the best way to provide some number that measures the performance of my RAG, which will give undeniable proof of improvement or deterioration of my Retrieval when tuning. This is very similar reasoning to why we use metrics like f1, precision, and recall as a performance metric in standard machine learning tasks. 
 
-#### Evaluation Dataset
+### Evaluation Dataset
 
 Before diving into performance metrics, I need a dataset to run these metrics against. The metrics that I will focus on require me to have a dataset containing sample queries the user might ask, and the associated context from the document database that should be retrieved based on that query. A query could have any number of relevant documents returned, so for this reason, I will be using a JSON datastructure to store the evaluation dataset. 
 
 The first step in developing this dataset is to gather a list of queries that the user might ask. I started with about 40 queries, since I would have to build this dataset manually, so even 100 rows would take a considerable amount of time to create. 
 
-#### Retreival Evaluation Metrics<sup>12</sup>
+### Retreival Evaluation Metrics<sup>12</sup>
 
 There are a lot of different performance metrics that one can use for RAG when evaluating, and they fall into many different categories. All of the different metrics can be identified as one of two types: 1) Binary Relevance Metrics<sup>11</sup> and 2) Graded Relevance Metrics. Binary relevance metrics will work off the assumption that a retrieved document is either "relevant" or "irrelevant", basically categorizing the retrieved documents into black and white classes; however, Graded Relevance Metrics instead aim to identify “shades” of relevance as opposed to black and white “is relevant” and “is not relevant”. For the purpose of this project, I will start by focusing on binary relevance, as it is a lot more simple to implement, and a lot more applicable in my use case (if I ask for earnings of a company, the returned chunks either answer the question or don't. There is no in-between.)
 
@@ -219,7 +217,7 @@ $$Recall@k = {True Positives@k \over (True Positives@k)+(False Negatives@k)}.$$
 F1@k combines precision and recall into a single metric, so it was a no brainer to also implement this as well. It is beneficial in scenarios where you must balance retrieving all relevant items (recall) and ensuring they are applicable (precision), and is helpful in situations where missing relevant documents or retrieving too many irrelevant items is costly. This is perfect for my scenario, so I will be heavily relying on F1@k. It is calculated as follows:
 $$F1@k = {2 * (Precision@k) * (Recall@k) \over (Precision@k) + (Recall@k)}.$$
 
-#### Generation Evalution Metrics
+### Generation Evalution Metrics
 
 For a RAG pipeline you typically want to assess both the retrieval results and the generation results from the LLM. This is to make sure that the RAG is retrieving the correct information, and that the LLM is drawing the correct conclusions from that information and overall functioning properly. For my generation evaluation, I didn't want to have to build out a whole other dataset for generation evalutation, as the retrieval dataset discussed earlier only functions for retrieval evaluation. 
 
@@ -465,7 +463,7 @@ This is what my RAG pipeline will look like after implementing these optimizatio
 
 ---
 
-# References
+## References
 
 1. Gao, Yunfan, Yun Xiong, Xinyu Gao, Kangxiang Jia, Jinliu Pan, Yuxi Bi, Yi Dai, Jiawei Sun, Meng Wang, and Haofen Wang. "Retrieval-augmented generation for large language models: A survey." arXiv preprint arXiv:2312.10997 (2023). [Online](https://arxiv.org/abs/2312.10997).
 
