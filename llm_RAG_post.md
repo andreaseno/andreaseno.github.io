@@ -6,6 +6,28 @@ layout: page
 permalink: /LLM_RAG/
 ---
 
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Project Overview](#project-overview)
+3. [RAG in Financial Chatbots](#rag-in-financial-chatbots)
+4. [CLI Interface](#cli-interface)
+5. [Prompt Engineering](#prompt-engineering)
+6. [PDF Injest/Parsing](#pdf-injest-and-parsing)
+7. [Database](#database)
+8. [Embedding](#embedding)
+9. [Chunking](#chunking)
+10. [Database Search](#database-search)
+11. [RAG Pipeline](#rag-pipeline)
+12. [Evalutation](#evalutation)
+13. [Initial Results & Performance](#initial-results-and-performance)
+14. [Improvements and Optimization](#improvements-and-optimization)
+15. [Optimized Results and Performance](#optimized-results-and-performance)
+16. [Challenges](#challenges)
+17. [Future Work](#future-work)
+18. [References](#references)
+
+
 ## Introduction
 
 In this blog, I will walk through my process of building a financial chatbot that uses **Retrieval-Augmented Generation (RAG)**. This project leverages **Ollama** as the large language model (LLM) and retrieves financial data from a database of **SEC 10-Q filings** using a hybrid search method combining vector similarity and keyword search. All of the code for the application referenced in this blog can be found [here](https://github.com/andreaseno/Financial_RAG_LLM).
@@ -95,7 +117,7 @@ md_content = """# Apple Inc.
 ![CLI Interface first version](img/cli.png)
 
 
-## PDF Injest/Parsing
+## PDF Injest and Parsing
 
 The next step was to create a way to ingest in PDF docs for my RAG pipeline. After reading some reviews<a href="#ref7" id="note7"><sup>7</sup></a> of various parsing technologies, I decided that LlamaParse<a href="#ref8" id="note8"><sup>8</sup></a> would work best. LlamaParse performs extremely well with financial data and converts everything into Markdown which makes it much easier to store as vectors. This is the only external API I will be using, and decided that it was okay to use because for an on prem chatbot, you could theoretically do all the database setup using internet, as long as the chatbot itself does not rely on internet. I also decided that creating a scraper to automatically ingest documents would be too time consuming to create for this project, so I decided to manually find and download the 10K and 10Q docs. Each document is inserted into a folder called `pdf_files` under the following structure:
 
@@ -296,7 +318,7 @@ To achieve this I leveraged Y-Finance's Python API to retrieve stock information
 #### How I Asses Performance
 I assess the performance of the company during the given quarter based on 3 metrics. I calculate the percentage change in ticker price for that quarter based off the closing prices. The percent change in a company's stock price reflects its overall performance in terms of value appreciation or depreciation. Positive changes can indicate strong financial results. I also calculate the volatility during the given quarter by assessing the standard deviation of returns. High volatility can suggest unstable investor sentiment or reactions to news/events, while low volatility may reflect stability and steady performance. Lastly, I calculate average trading volume using the volume data. High trading volumes typically come with large price movements, showing active investor engagement, while low volumes may indicate a lack of interest or uncertainty. Together these three metrics show a comprehensive evaluation of company performance for a quarter. Binary threshholds are set to then define what consitutes "good" performance vs. "bad" performance based on these metrics. For percent change, I have set positive performance to a value of +5% change or more. This is because many of the top S&P 500 stocks are large-cap, mature companies with moderate growth rates. A +5% quarterly price change is significant for these stocks, signaling strong performance. For volatility, I have set positive performance as less than 5% volatility. This is because these stocks tend to have lower volatility compared to smaller-cap stocks. Lastly, average trading volume greater than 1,000,000 shows positive performance. This is a conservative value since S&P 500 stocks typically have high liquidity and I want to avoid incorrectly stating poor performance. 
 
-## Initial Results & Performance
+## Initial Results and Performance
 
 Now that I have a fully functioning RAG pipeline with robust evaluation metrics, I can discuss my initial findings pre-optimization. 
 
@@ -409,7 +431,7 @@ Figure 10 is a flowchart showing what my RAG pipeline will look like after imple
 ![Optimized RAG Pipeline](img/optimized_rag_pipeline.png) 
 
 
-## Optimized Results & Performance
+## Optimized Results and Performance
 
 ### Hybrid Search
 
@@ -572,7 +594,7 @@ Looking at Figure 16 vs Figure 17, it is clear that the evaluation generation wo
 
 ---
 
-# Challenges 
+## Challenges 
 This project was a lofty goal to complete in one semester (3-months), and I was so busy that there is much left to be improved on. I ran into many challenges during the process of building out this Financial LLM. Below I detail many of the challenges I ran into:
 
 ### Computational Power Constraints
@@ -594,7 +616,7 @@ The generation evaluation turned out to be the biggest failure of this project. 
 
 ---
 
-# Future Work
+## Future Work
 
 ### Clone into AWS to Leverage Higher Computational power
 One of the first things I would need to do to take this project to the next level would be gain greater computational power to process more data and leverage more computationally expensive optimization techniques. Now the two ways to do this would be buy expensive hardware or use a cloud vendor and leverage their hardware. Now, the hardware I would need to buy would cost thousands of dollars (probably $5,000 or more), and that is way far out of my budget. Instead, it would be cool to move this project into an AWS instance and pay for compute power for that instance. That way I could only pay for the Compute power while I run it and shut down the instance while I am not using it, thus greatly reducing cost.
@@ -630,7 +652,7 @@ Further, creating a feedback loop where retrieval performance is evaluated along
 
 ---
 
-# References
+## References
 
 <a href="#note1" id="ref1">1.</a> [Ollama official site](https://ollama.com/)
 
